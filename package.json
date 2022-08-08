@@ -1,0 +1,28 @@
+{
+  "name": "product-supplychain-contract",
+  "version": "1.0.0",
+  "description": "This project showcases the journey of product beans on blockchain.",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/vikas_imperialsoftech/product-supplychain-contract.git"
+  },
+  "author": "Imperial Softech",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/vikas_imperialsoftech/product-supplychain-contract/issues"
+  },
+  "homepage": "https://gitlab.com/vikas_imperialsoftech/product-supplychain-contract#README",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "eth-gas-reporter": "^0.1.7",
+    "ethereumjs-abi": "^0.6.5",
+    "growl": "^1.10.5"
+  }
+}
