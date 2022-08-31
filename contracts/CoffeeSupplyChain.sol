@@ -7,6 +7,7 @@ contract ProductSupplyChain is Ownable
   
     event PerformCultivation(address indexed user, address indexed batchNo);
     event DoneInspection(address indexed user, address indexed batchNo);
+    event RejectInspection(address indexed user, address indexed batchNo);
     event DoneHarvesting(address indexed user, address indexed batchNo);
     event DoneExporting(address indexed user, address indexed batchNo);
     event DoneImporting(address indexed user, address indexed batchNo);
@@ -87,18 +88,21 @@ contract ProductSupplyChain is Ownable
                                 public isValidPerformer(_batchNo,'QUALITY_INSPECTOR') returns(bool) {
         /* Call Storage Contract */
         bool status = supplyChainStorage.setFarmInspectorData(_batchNo, _productFamily, _typeOfSeed, _fertilizerUsed);  
-        
-        emit DoneInspection(msg.sender, _batchNo);
+        if(!status){
+            emit RejectInspection(msg.sender, _batchNo);
+        }else{
+            emit DoneInspection(msg.sender, _batchNo);
+        }
         return (status);
     }
 
     
     /* get Harvest */
     
-    function getManufacturerData(address _batchNo) public view returns (string cropVariety, string temperatureUsed, string humidity) {
+    function getManufacturerData(address _batchNo) public view returns (string cropVariety, string temperatureUsed, string humidity, uint256 quantity) {
         /* Call Storage Contract */
-        (cropVariety, temperatureUsed, humidity) =  supplyChainStorage.getManufacturerData(_batchNo);  
-        return (cropVariety, temperatureUsed, humidity);
+        (cropVariety, temperatureUsed, humidity, quantity) =  supplyChainStorage.getManufacturerData(_batchNo);  
+        return (cropVariety, temperatureUsed, humidity, quantity);
     }
     
     /* perform Harvest */
@@ -106,11 +110,12 @@ contract ProductSupplyChain is Ownable
     function updateManufacturerData(address _batchNo,
                                 string _cropVariety,
                                 string _temperatureUsed,
-                                string _humidity) 
+                                string _humidity,
+                                uint256 _quantity) 
                                 public isValidPerformer(_batchNo,'MANUFACTURER') returns(bool) {
                                     
         /* Call Storage Contract */
-        bool status = supplyChainStorage.setManufacturerData(_batchNo, _cropVariety, _temperatureUsed, _humidity);  
+        bool status = supplyChainStorage.setManufacturerData(_batchNo, _cropVariety, _temperatureUsed, _humidity, _quantity);  
         
         emit DoneHarvesting(msg.sender, _batchNo);
         return (status);

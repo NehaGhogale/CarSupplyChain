@@ -81,6 +81,7 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
         string cropVariety;
         string temperatureUsed;
         string humidity;
+        uint256 quantity;
     }    
     
     struct exporter {
@@ -229,9 +230,11 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
         farmInspectorData.fertilizerUsed = _fertilizerUsed;
         
         batchFarmInspector[batchNo] = farmInspectorData;
-        
-        nextAction[batchNo] = 'MANUFACTURER'; 
-        
+        if(keccak256(_typeOfSeed) == keccak256("Reject")){
+            nextAction[batchNo] = 'QUALITY_INSPECTOR_REJECT'; 
+            return false;
+        }
+        nextAction[batchNo] = 'MANUFACTURER';
         return true;
     }
     
@@ -248,10 +251,11 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
     function setManufacturerData(address batchNo,
                               string _cropVariety,
                               string _temperatureUsed,
-                              string _humidity) public onlyAuthCaller returns(bool){
+                              string _humidity, uint256 _quantity) public onlyAuthCaller returns(bool){
         manufacturerData.cropVariety = _cropVariety;
         manufacturerData.temperatureUsed = _temperatureUsed;
         manufacturerData.humidity = _humidity;
+        manufacturerData.quantity = _quantity;
         
         batchManufacturer[batchNo] = manufacturerData;
         
@@ -263,10 +267,10 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
     /*get farm Manufacturer data*/
     function getManufacturerData(address batchNo) public onlyAuthCaller view returns(string cropVariety,
                                                                                            string temperatureUsed,
-                                                                                           string humidity){
+                                                                                           string humidity, uint256 quantity){
         
         manufacturer memory tmpData = batchManufacturer[batchNo];
-        return (tmpData.cropVariety, tmpData.temperatureUsed, tmpData.humidity);
+        return (tmpData.cropVariety, tmpData.temperatureUsed, tmpData.humidity, tmpData.quantity);
     }
     
     /*set Exporter data*/
@@ -277,7 +281,8 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
                               string _shipNo,
                               uint256 _estimateDateTime,
                               uint256 _exporterId) public onlyAuthCaller returns(bool){
-        
+        manufacturerData = batchManufacturer[batchNo];
+        require(manufacturerData.quantity>=_quantity);
         exporterData.quantity = _quantity;
         exporterData.destinationAddress = _destinationAddress;
         exporterData.shipName = _shipName;
@@ -327,7 +332,8 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
                               string _warehouseName,
                               string _warehouseAddress,
                               uint256 _importerId) public onlyAuthCaller returns(bool){
-        
+        exporterData = batchExporter[batchNo];
+        require(exporterData.quantity>=_quantity);
         importerData.quantity = _quantity;
         importerData.shipName = _shipName;
         importerData.shipNo = _shipNo;
@@ -378,8 +384,8 @@ contract SupplyChainStorage is SupplyChainStorageOwnable {
                               uint256 _packageDateTime,
                               string _deliveryHubName,
                               string _deliveryHubAddress) public onlyAuthCaller returns(bool){
-        
-        
+        importerData = batchImporter[batchNo];
+        require(importerData.quantity>= _quantity);
         deliveryHubData.quantity = _quantity;
         deliveryHubData.temperature = _temperature;
         deliveryHubData.rostingDuration = _rostingDuration;
